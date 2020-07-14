@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">ResourceQualifierDemo</string>
+    <string name="text_hello">Hello Világ!</string>
+
+</resources>
