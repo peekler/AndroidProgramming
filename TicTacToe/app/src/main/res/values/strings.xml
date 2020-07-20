@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">TicTacToe</string>
+
+    <string name="text_end">Game is over, end result: %1$d</string>
 </resources>
