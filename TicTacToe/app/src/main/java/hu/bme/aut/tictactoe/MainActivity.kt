@@ -3,6 +3,7 @@ package hu.bme.aut.tictactoe
 import android.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import hu.bme.aut.tictactoe.model.TicTacToeModel
 import kotlinx.android.synthetic.main.activity_main.*
@@ -15,6 +16,7 @@ class MainActivity : AppCompatActivity() {
         btnReset.setOnClickListener {
             ticView.resetGame()
 
+            Log.d("TAG_DEMO", "reset pressed")
         }
     }
 
