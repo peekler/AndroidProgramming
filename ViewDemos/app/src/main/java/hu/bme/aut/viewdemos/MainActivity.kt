@@ -68,8 +68,17 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
         //
     }
 
+
+    var selectEnabled = false
+
     override fun onItemSelected(p0: AdapterView<*>?, p1: View?, position: Int, p3: Long) {
-        Toast.makeText(this, spinnerFruits.getItemAtPosition(position).toString(),
-        Toast.LENGTH_LONG).show()
+        if (selectEnabled) {
+            Toast.makeText(
+                this, spinnerFruits.getItemAtPosition(position).toString(),
+                Toast.LENGTH_LONG
+            ).show()
+        } else {
+            selectEnabled = true
+        }
     }
 }
