@@ -6,20 +6,21 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import hu.bme.aut.todorecylerviewdemo.R
+import hu.bme.aut.todorecylerviewdemo.ScrollingActivity
+import hu.bme.aut.todorecylerviewdemo.data.AppDatabase
 import hu.bme.aut.todorecylerviewdemo.data.Todo
+import hu.bme.aut.todorecylerviewdemo.touch.TodoTouchHelperCallback
 import kotlinx.android.synthetic.main.todo_row.view.*
+import java.util.*
 
-class TodoAdapter : RecyclerView.Adapter<TodoAdapter.ViewHolder>{
+class TodoAdapter : RecyclerView.Adapter<TodoAdapter.ViewHolder>, TodoTouchHelperCallback{
 
-    var todoItems = mutableListOf<Todo>(
-        Todo("2020. 03. 12.", false, "Go to cinema"),
-        Todo("2020. 05. 11.", false, "Do the dishes"),
-        Todo("2020. 04. 10.", false, "Washing")
-    )
+    var todoItems = mutableListOf<Todo>()
 
     val context: Context
-    constructor(context: Context) : super() {
+    constructor(context: Context, todoList: List<Todo>) : super() {
         this.context = context
+        todoItems.addAll(todoList)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -38,6 +39,10 @@ class TodoAdapter : RecyclerView.Adapter<TodoAdapter.ViewHolder>{
         holder.tvDate.text = todoItem.createDate
         holder.cbDone.isChecked = todoItem.done
         holder.cbDone.text = todoItem.todoText
+
+        holder.btnDel.setOnClickListener {
+            deleteTodo(holder.adapterPosition)
+        }
     }
 
     fun addTodo(todo: Todo){
@@ -45,9 +50,31 @@ class TodoAdapter : RecyclerView.Adapter<TodoAdapter.ViewHolder>{
         notifyItemInserted(todoItems.lastIndex)
     }
 
+    fun deleteTodo(position: Int) {
+        var todoToDelete = todoItems.get(position)
+        Thread {
+            AppDatabase.getInstance(context).todoDao().deleteTodo(todoToDelete)
+
+            (context as ScrollingActivity).runOnUiThread {
+                todoItems.removeAt(position)
+                notifyItemRemoved(position)
+            }
+        }.start()
+    }
+
+    override fun onDismissed(position: Int) {
+        deleteTodo(position)
+    }
+
+    override fun onItemMoved(fromPosition: Int, toPosition: Int) {
+        Collections.swap(todoItems, fromPosition, toPosition)
+        notifyItemMoved(fromPosition, toPosition)
+    }
+
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         var tvDate = itemView.tvDate
         var cbDone = itemView.cbDone
+        var btnDel = itemView.btnDel
     }
 
 

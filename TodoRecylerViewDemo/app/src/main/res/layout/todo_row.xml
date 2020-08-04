@@ -26,6 +26,12 @@
             android:layout_height="wrap_content"
             android:text="Data" />
 
+        <Button
+            android:id="@+id/btnDel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Delete"/>
+
     </LinearLayout>
 
 </androidx.cardview.widget.CardView>
