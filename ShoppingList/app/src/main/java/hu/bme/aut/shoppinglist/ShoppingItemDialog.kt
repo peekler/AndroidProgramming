@@ -15,6 +15,7 @@ class ShoppingItemDialog : DialogFragment() {
 
     interface ShoppingItemDialogHandler {
         fun shoppingItemCreated(item: ShoppingItem)
+        fun shoppingItemUpdated(item: ShoppingItem)
     }
 
     private lateinit var shoppingItemHandler: ShoppingItemDialogHandler
@@ -33,12 +34,24 @@ class ShoppingItemDialog : DialogFragment() {
     private lateinit var etPrice: EditText
     private lateinit var spinnerCategory: Spinner
 
+    private var EDIT_MODE = false
+
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val builder = AlertDialog.Builder(requireContext())
-        builder.setTitle("New Item")
+
+        if (this.arguments!= null && this.arguments!!.containsKey(ScrollingActivity.KEY_EDIT)) {
+            EDIT_MODE = true
+        }
+
+        if (EDIT_MODE) {
+            builder.setTitle("Edit Item")
+        } else {
+            builder.setTitle("New Item")
+        }
 
         val rootView = requireActivity().layoutInflater.inflate(
-            R.layout.shopping_dialog, null)
+            R.layout.shopping_dialog, null
+        )
 
         etName = rootView.etName
         etPrice = rootView.etPrice
@@ -55,6 +68,14 @@ class ShoppingItemDialog : DialogFragment() {
 
         builder.setView(rootView)
 
+        if (EDIT_MODE) {
+            var shopItem = this.arguments!!.getSerializable(ScrollingActivity.KEY_EDIT) as ShoppingItem
+
+            etName.setText(shopItem.name)
+            etPrice.setText(shopItem.price.toString())
+            spinnerCategory.setSelection(shopItem.category)
+        }
+
         builder.setPositiveButton("OK") { dialog, which ->
             //... keep empty
         }
@@ -70,7 +91,12 @@ class ShoppingItemDialog : DialogFragment() {
         positiveButton.setOnClickListener {
             if (etName.text.isNotEmpty()) {
                 if (etPrice.text.isNotEmpty()) {
-                    handleItemCreate()
+                    if (EDIT_MODE) {
+                        handleItemUpdate()
+                    } else {
+                        handleItemCreate()
+                    }
+
                     dialog.dismiss()
                 } else {
                     etPrice.error = "This field can not be empty"
@@ -81,16 +107,27 @@ class ShoppingItemDialog : DialogFragment() {
         }
     }
 
-
-
     fun handleItemCreate() {
         shoppingItemHandler.shoppingItemCreated(
-            ShoppingItem(etName.text.toString(),
-            etPrice.text.toString().toInt(),
-            spinnerCategory.selectedItemPosition,
-            false,
-            "Demo")
+            ShoppingItem(
+                null,
+                etName.text.toString(),
+                etPrice.text.toString().toInt(),
+                spinnerCategory.selectedItemPosition,
+                false,
+                "Demo"
+            )
         )
+    }
+
+    private fun handleItemUpdate() {
+        var shopItemToEdit = this.arguments!!.getSerializable(ScrollingActivity.KEY_EDIT) as ShoppingItem
+
+        shopItemToEdit.name = etName.text.toString()
+        shopItemToEdit.price = etPrice.text.toString().toInt()
+        shopItemToEdit.category = spinnerCategory.selectedItemPosition
+
+        shoppingItemHandler.shoppingItemUpdated(shopItemToEdit)
     }
 
 }

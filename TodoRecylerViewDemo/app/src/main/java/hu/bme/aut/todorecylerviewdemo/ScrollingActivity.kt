@@ -29,7 +29,9 @@ class ScrollingActivity : AppCompatActivity(), TodoDialog.TodoHandler {
         initRecyclerView()
 
         fab.setOnClickListener {
-            TodoDialog().show(supportFragmentManager, "Dialog")
+            var dialogTodo = TodoDialog()
+            dialogTodo.isCancelable = false
+            dialogTodo.show(supportFragmentManager, "Dialog")
         }
 
     }
@@ -58,8 +60,8 @@ class ScrollingActivity : AppCompatActivity(), TodoDialog.TodoHandler {
 
     override fun todoCreated(todo: Todo) {
         Thread {
-            AppDatabase.getInstance(this@ScrollingActivity).todoDao().insertTodo(todo)
-
+            var newId = AppDatabase.getInstance(this@ScrollingActivity).todoDao().insertTodo(todo)
+            todo.todoId = newId
             runOnUiThread {
                 todoAdapter.addTodo(todo)
             }

@@ -10,18 +10,19 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import hu.bme.aut.shoppinglist.R
+import hu.bme.aut.shoppinglist.ScrollingActivity
+import hu.bme.aut.shoppinglist.data.AppDatabase
 import hu.bme.aut.shoppinglist.data.ShoppingItem
 import kotlinx.android.synthetic.main.shop_item.view.*
 
 class ShoppingAdapter : RecyclerView.Adapter<ShoppingAdapter.ViewHolder> {
 
-    private val items = mutableListOf<ShoppingItem>(
-        ShoppingItem("Demo", 123, 1, false, "Desc")
-    )
+    private val items = mutableListOf<ShoppingItem>()
     private val context: Context
 
-    constructor(context: Context) : super() {
+    constructor(context: Context, itemsList: List<ShoppingItem>) : super() {
         this.context = context
+        items.addAll(itemsList)
     }
 
 
@@ -51,13 +52,43 @@ class ShoppingAdapter : RecyclerView.Adapter<ShoppingAdapter.ViewHolder> {
             holder.ivItemLogo.setImageResource(R.drawable.sport)
         }
 
+        holder.btnDelete.setOnClickListener {
+            deleteItem(holder.adapterPosition)
+        }
+
+        holder.btnEdit.setOnClickListener {
+            (context as ScrollingActivity).showEditDialog(
+                items[holder.adapterPosition], holder.adapterPosition
+            )
+        }
     }
 
+    fun deleteItem(position: Int) {
+        try {
+            var itemToDelete = items.get(position)
+            Thread {
+                AppDatabase.getInstance(context).shoppingDao().
+                    deleteShoppingItem(itemToDelete)
+
+                (context as ScrollingActivity).runOnUiThread {
+                    items.removeAt(position)
+                    notifyItemRemoved(position)
+                }
+            }.start()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
 
     fun addItem(item: ShoppingItem) {
         items.add(item)
         //notifyDataSetChanged()
         notifyItemInserted(items.lastIndex)
+    }
+
+    fun updateItem(item: ShoppingItem, editIndex: Int) {
+        items.set(editIndex, item)
+        notifyItemChanged(editIndex)
     }
 
 

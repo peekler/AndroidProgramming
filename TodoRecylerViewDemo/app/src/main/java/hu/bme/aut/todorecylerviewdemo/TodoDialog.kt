@@ -4,13 +4,14 @@ import android.app.AlertDialog
 import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
+import android.view.inputmethod.InputMethodManager
 import android.widget.CheckBox
 import android.widget.EditText
 import androidx.fragment.app.DialogFragment
 import hu.bme.aut.todorecylerviewdemo.data.Todo
 import kotlinx.android.synthetic.main.todo_dialog.view.*
-import java.lang.RuntimeException
 import java.util.*
+
 
 class TodoDialog : DialogFragment() {
 
@@ -65,6 +66,19 @@ class TodoDialog : DialogFragment() {
 
 
         return dialogBuilder.create()
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        etTodoText.requestFocus()
+
+        val inputMethodManager =
+            context!!.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        inputMethodManager.toggleSoftInput(
+            InputMethodManager.SHOW_FORCED,
+            0
+        )
     }
 
 

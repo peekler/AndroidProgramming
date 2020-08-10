@@ -43,6 +43,14 @@ class TodoAdapter : RecyclerView.Adapter<TodoAdapter.ViewHolder>, TodoTouchHelpe
         holder.btnDel.setOnClickListener {
             deleteTodo(holder.adapterPosition)
         }
+
+        holder.cbDone.setOnClickListener {
+            todoItem.done = holder.cbDone.isChecked
+
+            Thread {
+                AppDatabase.getInstance(context).todoDao().updateTodo(todoItem)
+            }.start()
+        }
     }
 
     fun addTodo(todo: Todo){
@@ -51,15 +59,19 @@ class TodoAdapter : RecyclerView.Adapter<TodoAdapter.ViewHolder>, TodoTouchHelpe
     }
 
     fun deleteTodo(position: Int) {
-        var todoToDelete = todoItems.get(position)
-        Thread {
-            AppDatabase.getInstance(context).todoDao().deleteTodo(todoToDelete)
+        try {
+            var todoToDelete = todoItems.get(position)
+            Thread {
+                AppDatabase.getInstance(context).todoDao().deleteTodo(todoToDelete)
 
-            (context as ScrollingActivity).runOnUiThread {
-                todoItems.removeAt(position)
-                notifyItemRemoved(position)
-            }
-        }.start()
+                (context as ScrollingActivity).runOnUiThread {
+                    todoItems.removeAt(position)
+                    notifyItemRemoved(position)
+                }
+            }.start()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     override fun onDismissed(position: Int) {
